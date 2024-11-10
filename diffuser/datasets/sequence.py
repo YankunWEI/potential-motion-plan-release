@@ -75,6 +75,9 @@ class SequenceDataset(torch.utils.data.Dataset):
             
             if self.debug_mode and cnt > 10000:
                 break
+
+            if cnt >= max_n_episodes:
+                break
         
         print('[SequenceDataset] fields Paths cnt:', cnt)
         

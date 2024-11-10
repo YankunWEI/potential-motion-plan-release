@@ -6,6 +6,8 @@ import pdb
 import os.path as osp
 import torch
 torch.backends.cudnn.benchmark = True
+import matplotlib
+matplotlib.use('Agg')
 
 #-----------------------------------------------------------------------------#
 #----------------------------------- setup -----------------------------------#

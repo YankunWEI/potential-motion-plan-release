@@ -12,7 +12,7 @@
             "program": "scripts/train.py",
             "console": "integratedTerminal",
             "args": [
-                "--config", "config/rm2d/rSmaze_nw6_hExt05_exp.py"
+                "--config", "config/rm2d/rSmaze_training_test.py"
             ],
             "env": {
                 "CUDA_VISIBLE_DEVICES": "0",

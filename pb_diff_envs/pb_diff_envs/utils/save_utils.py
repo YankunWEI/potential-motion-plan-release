@@ -3,6 +3,8 @@ import gym, pdb
 import os.path as osp
 import os
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 
 def save_envlist_xyz_idx_list(env_dvg_list, env_name):
     '''aka wall_idx in d4rl
