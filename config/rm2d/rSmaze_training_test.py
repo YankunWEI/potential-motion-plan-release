@@ -64,7 +64,7 @@ base = {
         'wall_embed_dim': vit1d_config['embed_dim'], ## used only in MLP cases
         'network_config': dict(wallLoc_encoder='vit1d', vit1d_config=vit1d_config,
                                concept_drop_prob=0.2, cat_t_w=True,
-                               energy_mode=True,
+                               energy_mode=False,
                                energy_param_type='L2', ## lastest L2 version
                                conv_zero_init=False,
                                last_conv_ksize=1),
@@ -154,6 +154,7 @@ base = {
         'prefix': 'plans/release',
         'exp_name': watch(plan_args_to_watch),
         'suffix': '0',
+        'return_diffusion': True,
 
         'conditional': True,
 

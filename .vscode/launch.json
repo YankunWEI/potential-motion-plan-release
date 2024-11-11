@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File with Arguments",
+            "name": "Python Debugger: train.py",
             "pythonPath": "/home/hongli/anaconda3/envs/motion/bin/python3.9",
             "type": "debugpy",
             "request": "launch",
@@ -13,6 +13,21 @@
             "console": "integratedTerminal",
             "args": [
                 "--config", "config/rm2d/rSmaze_training_test.py"
+            ],
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "0",
+                "OMP_NUM_THREADS": "1"
+            }
+        },
+        {
+            "name": "Python Debugger: plan_rm2d.py",
+            "pythonPath": "/home/hongli/anaconda3/envs/motion/bin/python3.9",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "scripts/plan_rm2d.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--config", "config/rm2d/rSmaze_training_test.py", "--plan_n_maze", "1"
             ],
             "env": {
                 "CUDA_VISIBLE_DEVICES": "0",

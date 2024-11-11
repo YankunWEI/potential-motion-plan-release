@@ -57,11 +57,11 @@ if __name__ == '__main__':
     if 'Dyn' not in args.dataset:
         ## Static Maze2D
         args.seq_eval = False
-        depoch_list = [int(19e5),] # int(5e5),]
+        depoch_list = [int(0),] # choose model file to use here
         args.ddim_steps = 8
 
         args.n_prob_env = 20
-        args.use_ddim = True # False # True
+        args.use_ddim = False # False # True
         args.load_unseen_maze = True
         args.cond_w = 2.0 # 2.0
         args.do_replan = False # False # True

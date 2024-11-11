@@ -204,7 +204,7 @@ class DiffusionPlanner:
                 seed_maze=99,
                 n_maze=int(args.plan_n_maze),
                 ## vis
-                return_diffusion=False,
+                return_diffusion=args.return_diffusion,
                 num_gif_traj=2,
 
                 problems_dict=problems_dict,
