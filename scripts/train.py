@@ -91,6 +91,9 @@ diffusion_config = utils.Config(
     loss_type=args.loss_type, ## checkparam
     clip_denoised=args.clip_denoised,
     predict_epsilon=args.predict_epsilon,
+    predict_gradient=args.predict_gradient,
+    use_model_based_diffusion=args.use_model_based_diffusion,
+    normalizer = dataset.normalizer,
 
     diff_config=getattr(args, 'diff_config', {}),
     

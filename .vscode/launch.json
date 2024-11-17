@@ -12,7 +12,8 @@
             "program": "scripts/train.py",
             "console": "integratedTerminal",
             "args": [
-                "--config", "config/rm2d/rSmaze_training_test.py"
+                "--config",
+                "config/rm2d/rSmaze_training_test.py"
             ],
             "env": {
                 "CUDA_VISIBLE_DEVICES": "0",
@@ -27,7 +28,10 @@
             "program": "scripts/plan_rm2d.py",
             "console": "integratedTerminal",
             "args": [
-                "--config", "config/rm2d/rSmaze_training_test.py", "--plan_n_maze", "1"
+                "--config",
+                "config/rm2d/rSmaze_training_test.py",
+                "--plan_n_maze",
+                "1"
             ],
             "env": {
                 "CUDA_VISIBLE_DEVICES": "0",

@@ -15,6 +15,7 @@ from .helpers import (
 import matplotlib.pyplot as plt
 from diffuser.utils.luo_utils import plot_xy, batch_repeat_tensor
 from colorama import Fore
+from diffuser.models.model_based_gradient import model_based_score
 
 class GaussianDiffusionPB(nn.Module):
     '''
@@ -30,6 +31,9 @@ class GaussianDiffusionPB(nn.Module):
                 loss_type='l2', 
                 clip_denoised=False, 
                 predict_epsilon=True, 
+                predict_gradient=False,
+                use_model_based_diffusion=False,
+                normalizer=None,
                 loss_discount=1.0, 
                 loss_weights=None, 
                 condition_guidance_w=0.1, 
@@ -66,6 +70,14 @@ class GaussianDiffusionPB(nn.Module):
         self.n_timesteps = int(n_timesteps)
         self.clip_denoised = clip_denoised
         self.predict_epsilon = predict_epsilon
+        self.predict_gradient = predict_gradient
+        if self.predict_epsilon and self.predict_gradient:
+            assert normalizer is not None, "When choosing predict gradient, normalizer must be given!"
+            self.normalizer = normalizer
+        self.use_model_based_diffusion = use_model_based_diffusion
+        if self.use_model_based_diffusion:
+            assert self.predict_epsilon and self.predict_gradient, \
+                "When using model_based_diffusion, predict_epsilon and predict_gradient must be true!"
 
         self.register_buffer('betas', betas)
         self.register_buffer('alphas_cumprod', alphas_cumprod)
@@ -165,16 +177,22 @@ class GaussianDiffusionPB(nn.Module):
         x = x.detach()
         
         ## get cond and uncond in one forward
-        x_2, cond_2, t_2, walls_loc_2 = batch_repeat_tensor(x, cond, t, walls_loc, 2)
-        x_2 = x_2.detach()
-        out = self.model(x_2, cond_2, t_2, walls_loc_2, use_dropout=False, force_dropout=True, half_fd=True)
+        if self.use_model_based_diffusion:
+            score = model_based_score(x, self.normalizer,
+                                            walls_loc, cond, extract(self.alphas_cumprod, t, x.shape), 
+                                            extract(self.sqrt_alphas_cumprod, t, x.shape),
+                                            extract(self.sqrt_one_minus_alphas_cumprod, t, x.shape))
+            epsilon = -score * extract(self.sqrt_one_minus_alphas_cumprod, t, x.shape)
+        else:
+            x_2, cond_2, t_2, walls_loc_2 = batch_repeat_tensor(x, cond, t, walls_loc, 2)
+            x_2 = x_2.detach()
+            out = self.model(x_2, cond_2, t_2, walls_loc_2, use_dropout=False, force_dropout=True, half_fd=True)
 
-        epsilon_cond = out[:len(t), :, :]
-        epsilon_uncond = out[len(t):, :, :]
-        assert epsilon_cond.shape == epsilon_uncond.shape
+            epsilon_cond = out[:len(t), :, :]
+            epsilon_uncond = out[len(t):, :, :]
+            assert epsilon_cond.shape == epsilon_uncond.shape
 
-
-        epsilon = epsilon_uncond + self.condition_guidance_w*(epsilon_cond - epsilon_uncond)
+            epsilon = epsilon_uncond + self.condition_guidance_w*(epsilon_cond - epsilon_uncond)
 
 
         t = t.detach().to(torch.int64)
@@ -484,6 +502,8 @@ class GaussianDiffusionPB(nn.Module):
         return sample
 
     def p_losses(self, x_start, cond, t, walls_loc, return_x_recon=False):
+        #TODO: do not set noise at start and goal to 0, instead apply condition to x_noisy, which mean it
+        # require to predict noise at start and goal which is actually zero
         noise = torch.randn_like(x_start)
 
         x_noisy = self.q_sample(x_start=x_start, t=t, noise=noise)
@@ -506,7 +526,15 @@ class GaussianDiffusionPB(nn.Module):
         assert noise.shape == x_recon.shape, f'{noise.shape}, {x_recon.shape}'
 
         if self.predict_epsilon:
-            loss, info = self.loss_fn(x_recon, noise)
+            if self.predict_gradient:
+                #calculate gradient with model based diffusion
+                loss, info = self.loss_fn(x_recon, noise)
+                score = model_based_score(x_noisy, self.normalizer,
+                                                walls_loc, cond, extract(self.alphas_cumprod, t, x_start.shape), 
+                                                extract(self.sqrt_alphas_cumprod, t, x_start.shape),
+                                                extract(self.sqrt_one_minus_alphas_cumprod, t, x_start.shape))
+            else:
+                loss, info = self.loss_fn(x_recon, noise)
         else:
             loss, info = self.loss_fn(x_recon, x_start)
         if self.energy_mode and self.training:

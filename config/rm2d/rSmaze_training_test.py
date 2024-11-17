@@ -57,6 +57,8 @@ base = {
         'loss_weights': None,
         'loss_discount': 1,
         'predict_epsilon': True,
+        'predict_gradient': True,
+        'use_model_based_diffusion': True,
         'dim': 64,
         'dim_mults': (1, 4, 8),
         'num_walls': num_walls,
